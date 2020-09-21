@@ -256,7 +256,7 @@ public class WeightChart extends View {
         min = ((int) min / 5) * 5;
         max = ((int) max / 5) * 5 + 5;
         ArrayList<Integer> listResult = new ArrayList<>();
-        for (int i = max; i >= min; i -= 5) {
+        for (int i = min; i <= max; i += 5) {
             listResult.add(i);
         }
         return listResult;
@@ -273,9 +273,8 @@ public class WeightChart extends View {
         }
         this.listAxisY = new ArrayList<>();
         for (int i = 0; i < this.listNumber.size(); i++) {
-            this.listAxisY.add((axisXPaddingBot + axisXHeightDate + axisXYdistanceHeight) + i * unitY - axisYHeightNumber / 2);
+            this.listAxisY.add(getHeight() - axisXPaddingBot - axisXHeightDate - axisXYdistanceHeight - axisXHeightDate/2 - i*unitY);
         }
-        Collections.reverse(this.listAxisY);
     }
 
     private void drawValueAxis(Canvas canvas, Paint paint) {
@@ -284,7 +283,7 @@ public class WeightChart extends View {
         }
 
         for (int i = 0; i < listNumber.size(); i++) {
-            canvas.drawText(String.valueOf(listNumber.get(i)), axisYPaddingLeft, (axisXPaddingBot + axisXHeightDate + axisXYdistanceHeight) + i * (axisYdistanceNumber + axisYHeightNumber), paint);
+            canvas.drawText(String.valueOf(listNumber.get(i)), axisYPaddingLeft, this.listAxisY.get(i) + axisYHeightNumber/2, paint);
         }
     }
 
