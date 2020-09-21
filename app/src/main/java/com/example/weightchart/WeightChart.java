@@ -8,6 +8,7 @@ import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
@@ -15,6 +16,7 @@ import android.view.View;
 
 import androidx.annotation.ColorRes;
 import androidx.annotation.Nullable;
+import androidx.core.content.res.ResourcesCompat;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,7 +25,25 @@ import java.util.Random;
 
 public class WeightChart extends View {
 
+    final float radRRectCurrentDate = dpToPx(2, getContext());
+    final float widthRRectCurrentDate = dpToPx(80, getContext());
+    final float heightRRectCurrentDate = dpToPx(50, getContext());
+    final float widthStrokeCurrentDate = dpToPx(2, getContext());
+    private ArrayList<Float> listWeight;
+
+    private float topPaddingRRectCurrentDate = dpToPx(6, getContext());
+    private float leftPaddingRRectCurrentDate = dpToPx(11, getContext());
+    final float topPaddingTextStepCurrentDate = dpToPx(5, getContext());
+
+    Paint paintRRectCurrentDate;
+    private Paint paintLineCurrentDate;
+    private float leftRRectCurrentDate;
+    private float heightTextStepCurrentDate;
+
+
     float widthRRect = dpToPx(20, getContext());
+
+
 
     int axisXPaddingMon = 70;
     int axisXPaddingSun = 10;
@@ -31,12 +51,12 @@ public class WeightChart extends View {
     int axisXHeightDate;
     int axisXDistanceDate;
 
-    int axisXYdistanceHeight = 20;
+    int axisXYdistanceHeight = 0;
     int axisXYdistanceWidth = 20;
 
-    int axisYdistanceNumber;
+    float axisYdistanceNumber;
     int axisYmaxLengthNumber;
-    int axisYPaddingTop = 100;
+    float axisYPaddingTop = heightRRectCurrentDate;
     int axisYPaddingLeft = 10;
     int axisYHeightNumber;
 
@@ -49,6 +69,7 @@ public class WeightChart extends View {
     float unitX;
     float unitY;
 
+    Paint paintStepTextCurrentDate;
     Paint paintDate;
     Paint paintRRect;
     Paint paintGrid;
@@ -65,15 +86,15 @@ public class WeightChart extends View {
         super(context, attrs);
         initDate();
         initPaintText();
-        ArrayList<Integer> listDataFake = new ArrayList<>();
-        listDataFake.add(39);
-        listDataFake.add(68);
-        listDataFake.add(70);
-        listDataFake.add(81);
-        listDataFake.add(53);
-        listDataFake.add(50);
-        listDataFake.add(60);
-        this.listNumber = genAxisYValue(listDataFake);
+        this.listWeight = new ArrayList<>();
+        listWeight.add(39f);
+        listWeight.add(68f);
+        listWeight.add(70f);
+        listWeight.add(81f);
+        listWeight.add(53f);
+        listWeight.add(50f);
+        listWeight.add(60f);
+        this.listNumber = genAxisYValue(listWeight);
     }
 
     @Override
@@ -93,6 +114,10 @@ public class WeightChart extends View {
                 - listNumber.size() * axisYHeightNumber) / (listNumber.size() - 1);
 
         axisXDistanceDate = (getWidth() - boundDate.width() * 7 - (axisXPaddingMon + axisYmaxLengthNumber + axisXYdistanceWidth + axisXPaddingSun)) / 6;
+
+        Rect boundValueStepCurrentDate = new Rect();
+        paintStepTextCurrentDate.getTextBounds("보", 0, 1, boundValueStepCurrentDate);
+        this.heightTextStepCurrentDate = boundValueStepCurrentDate.height();
 
         calculateAxis();
 
@@ -121,6 +146,10 @@ public class WeightChart extends View {
         drawAllRRects(canvas, paintRRect, listHeightRRectTest, listPointTest);
         drawLineValueAverage(canvas, paintAverage, listPointAverageTest);
         drawLineValueDate(canvas, paintPointFill, paintPointStroke, listPointTest);
+
+/*        drawLineCurrentDate(canvas, paintLineCurrentDate, 6);
+        drawRRectCurrentDate(canvas, paintRRectCurrentDate, 6);
+        drawTextStepCurrentDate(canvas, paintDate, paintStepTextCurrentDate, 6);*/
 
 
     }
@@ -181,6 +210,35 @@ public class WeightChart extends View {
         paintPointStroke.setAntiAlias(true);
         paintAverage.setAntiAlias(true);
 
+        paintStepTextCurrentDate = new Paint();
+        //paintStepTextCurrentDate.setColor(getResources().getColor(R.color.grey900, null));
+        paintStepTextCurrentDate.setStyle(Paint.Style.FILL_AND_STROKE);
+        //paintStepTextCurrentDate.setTypeface(ResourcesCompat.getFont(getContext(), R.font.notosanskr_regular));
+        paintStepTextCurrentDate.setTextSize(spToPx(15, getContext()));
+
+        paintRRectCurrentDate = new Paint();
+        //paintRRectCurrentDate.setColor(getResources().getColor(R.color.grey100, null));
+        paintRRectCurrentDate.setStyle(Paint.Style.FILL);
+
+        paintLineCurrentDate = new Paint();
+        //paintLineCurrentDate.setColor(getResources().getColor(R.color.grey300, null));
+        paintLineCurrentDate.setStrokeWidth(this.widthStrokeCurrentDate);
+        paintLineCurrentDate.setStyle(Paint.Style.STROKE);
+
+
+        paintGrid = new Paint();
+        paintGrid.setColor(Color.RED);
+        paintGrid.setStyle(Paint.Style.STROKE);
+
+
+
+        paintGrid.setAntiAlias(true);
+
+        paintStepTextCurrentDate.setAntiAlias(true);
+        paintRRectCurrentDate.setAntiAlias(true);
+        paintLineCurrentDate.setAntiAlias(true);
+        paintLineCurrentDate.setAntiAlias(true);
+
     }
 
     public static int spToPx(float sp, Context context) {
@@ -191,10 +249,10 @@ public class WeightChart extends View {
         return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, context.getResources().getDisplayMetrics());
     }
 
-    public ArrayList<Integer> genAxisYValue(ArrayList<Integer> list) {
+    public ArrayList<Integer> genAxisYValue(ArrayList<Float> list) {
 
-        int min = Collections.min(list);
-        int max = Collections.max(list);
+        int min = Math.round(Collections.min(list));
+        int max = (int)Math.ceil(Collections.max(list));
         min = ((int) min / 5) * 5;
         max = ((int) max / 5) * 5 + 5;
         ArrayList<Integer> listResult = new ArrayList<>();
@@ -270,6 +328,33 @@ public class WeightChart extends View {
         for (int i = 0; i < pointList.size() - 1; i++) {
             canvas.drawLine(pointList.get(i).x, pointList.get(i).y, pointList.get(i + 1).x, pointList.get(i + 1).y, paintStroke);
         }
+    }
+
+    private void drawLineCurrentDate(Canvas canvas, Paint paint, int indexCurrentDate) {
+        canvas.drawLine(this.listAxisX.get(indexCurrentDate), this.listAxisY.get(0),
+                this.listAxisX.get(indexCurrentDate), 0f, paint);
+    }
+
+    private void drawRRectCurrentDate(Canvas canvas, Paint paint, int indexCurrentDate) {
+        float left = this.listAxisX.get(indexCurrentDate) - this.widthRRectCurrentDate / 2;
+        float right = this.listAxisX.get(indexCurrentDate) + this.widthRRectCurrentDate / 2;
+        if (left < 0) {
+            left = 0;
+            right = this.widthRRectCurrentDate;
+        } else if (right > getWidth()) {
+            right = getWidth();
+            left = right - this.widthRRectCurrentDate;
+        }
+        this.leftRRectCurrentDate = left;
+        canvas.drawRoundRect(left, 0, right, this.heightRRectCurrentDate, this.radRRectCurrentDate, this.radRRectCurrentDate, paint);
+    }
+
+    private void drawTextStepCurrentDate(Canvas canvas, Paint paintDate, Paint paintValueStep, int indexCurrentDate) {
+        canvas.drawText("8/25 · 오늘", this.leftRRectCurrentDate + this.leftPaddingRRectCurrentDate,
+                this.topPaddingRRectCurrentDate + axisXHeightDate, paintDate);
+        canvas.drawText(this.listWeight.get(indexCurrentDate) + "보", this.leftRRectCurrentDate + this.leftPaddingRRectCurrentDate,
+                this.topPaddingRRectCurrentDate + axisXHeightDate + heightTextStepCurrentDate + this.topPaddingTextStepCurrentDate,
+                paintValueStep);
     }
 
 
