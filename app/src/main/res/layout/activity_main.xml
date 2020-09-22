@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <com.example.weightchart.WeightChart
+    <com.example.weightchart.Weight7DaysChart
         android:layout_width="322dp"
         android:layout_height="250dp"
         app:layout_constraintBottom_toBottomOf="parent"

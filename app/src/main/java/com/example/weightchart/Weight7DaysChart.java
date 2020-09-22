@@ -4,26 +4,21 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
 
 
-import androidx.annotation.ColorRes;
 import androidx.annotation.Nullable;
-import androidx.core.content.res.ResourcesCompat;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 
-public class WeightChart extends View {
+public class Weight7DaysChart extends View {
 
     final float radRRectCurrentDate = dpToPx(2, getContext());
     final float widthRRectCurrentDate = dpToPx(80, getContext());
@@ -44,14 +39,13 @@ public class WeightChart extends View {
     float widthRRect = dpToPx(20, getContext());
 
 
-
     int axisXPaddingMon = 70;
     int axisXPaddingSun = 10;
     int axisXPaddingBot = 5;
     int axisXHeightDate;
     int axisXDistanceDate;
 
-    int axisXYdistanceHeight = 0;
+    int axisXYdistanceHeight = 10;
     int axisXYdistanceWidth = 20;
 
     float axisYdistanceNumber;
@@ -67,7 +61,7 @@ public class WeightChart extends View {
     ArrayList<Float> listAxisX;
     ArrayList<Float> listAxisY;
     float unitX;
-    float unitY;
+    float unitYSpace;
 
     Paint paintStepTextCurrentDate;
     Paint paintDate;
@@ -76,24 +70,26 @@ public class WeightChart extends View {
     Paint paintPointFill;
     Paint paintPointStroke;
     Paint paintAverage;
+    private float unitY;
+    private int minAxisY;
 
 
-    public WeightChart(Context context) {
+    public Weight7DaysChart(Context context) {
         super(context);
     }
 
-    public WeightChart(Context context, @Nullable AttributeSet attrs) {
+    public Weight7DaysChart(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         initDate();
         initPaintText();
         this.listWeight = new ArrayList<>();
-        listWeight.add(39f);
-        listWeight.add(68f);
-        listWeight.add(70f);
-        listWeight.add(81f);
-        listWeight.add(53f);
-        listWeight.add(50f);
+        listWeight.add(54f);
+        listWeight.add(57f);
+        listWeight.add(56f);
         listWeight.add(60f);
+        listWeight.add(65f);
+        listWeight.add(69f);
+        listWeight.add(65f);
         this.listNumber = genAxisYValue(listWeight);
     }
 
@@ -129,27 +125,43 @@ public class WeightChart extends View {
         //drawGrid(canvas, paintGrid);
         drawValueAxis(canvas, paintDate);
 
-        List<Point> listPointTest = new ArrayList<>();
-        List<Point> listPointAverageTest = new ArrayList<>();
+        List<Point> listPoint = new ArrayList<>();
+        List<Float> listAverageTest = new ArrayList<>();
         List<Float> listHeightRRectTest = new ArrayList<>();
         for (int i = 0; i <= 6; i++) {
-            listPointTest.add(new Point(Math.round(listAxisX.get(i)), Math.round(listAxisY.get(getRandomNumber(0, listAxisY.size() - 1)))));
-            listHeightRRectTest.add((float) getRandomNumber(100, 300));
+            listPoint.add(convertWeightToPoint(listWeight.get(i),i));
         }
 
         for (int i = 0; i <= 6; i++) {
-            listPointAverageTest.add(new Point(Math.round(listAxisX.get(i)), Math.round(listAxisY.get(getRandomNumber(0, listAxisY.size() - 1)))));
-            listPointAverageTest.add(new Point(Math.round(listAxisX.get(i) + (float) unitX / 2f), Math.round(listAxisY.get(getRandomNumber(0, listAxisY.size() - 1)))));
+            listHeightRRectTest.add((float)getRandomNumber(0, Math.round(dpToPx(60,getContext()))));
         }
-        listPointAverageTest.remove(listPointAverageTest.size() - 1);
 
-        drawAllRRects(canvas, paintRRect, listHeightRRectTest, listPointTest);
-        drawLineValueAverage(canvas, paintAverage, listPointAverageTest);
-        drawLineValueDate(canvas, paintPointFill, paintPointStroke, listPointTest);
+        float randWeight;
+        for (int i = 0; i < listWeight.size(); i++) {
+            randWeight =this.listWeight.get(i) + getRandomNumber(-1, Math.round(dpToPx(1,getContext())));
+            if(randWeight < listNumber.get(0))
+                randWeight= listNumber.get(0);
+            else if(randWeight > listNumber.get(listNumber.size()-1))
+                randWeight= listNumber.get(listNumber.size()-1);
+            listAverageTest.add(randWeight);
 
-/*        drawLineCurrentDate(canvas, paintLineCurrentDate, 6);
+            randWeight =this.listWeight.get(i) + getRandomNumber(-1, Math.round(dpToPx(1,getContext())));
+            if(randWeight < listNumber.get(0))
+                randWeight= listNumber.get(0);
+            else if(randWeight > listNumber.get(listNumber.size()-1))
+                randWeight= listNumber.get(listNumber.size()-1);
+            listAverageTest.add(randWeight);
+
+        }
+        listAverageTest.remove(listAverageTest.size()-1);
+
+        drawAllRRects(canvas, paintRRect, listHeightRRectTest, listPoint);
+        drawLineValueAverage(canvas, paintAverage, listAverageTest);
+        drawLineValueDate(canvas, paintPointFill, paintPointStroke, listPoint);
+
+        drawLineCurrentDate(canvas, paintLineCurrentDate, 6);
         drawRRectCurrentDate(canvas, paintRRectCurrentDate, 6);
-        drawTextStepCurrentDate(canvas, paintDate, paintStepTextCurrentDate, 6);*/
+        drawTextStepCurrentDate(canvas, paintDate, paintStepTextCurrentDate, 6);
 
 
     }
@@ -169,7 +181,7 @@ public class WeightChart extends View {
         this.listDate.add("일");
     }
 
-    public WeightChart(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public Weight7DaysChart(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 
@@ -211,17 +223,17 @@ public class WeightChart extends View {
         paintAverage.setAntiAlias(true);
 
         paintStepTextCurrentDate = new Paint();
-        //paintStepTextCurrentDate.setColor(getResources().getColor(R.color.grey900, null));
+        paintStepTextCurrentDate.setColor(getResources().getColor(R.color.grey900, null));
         paintStepTextCurrentDate.setStyle(Paint.Style.FILL_AND_STROKE);
         //paintStepTextCurrentDate.setTypeface(ResourcesCompat.getFont(getContext(), R.font.notosanskr_regular));
         paintStepTextCurrentDate.setTextSize(spToPx(15, getContext()));
 
         paintRRectCurrentDate = new Paint();
-        //paintRRectCurrentDate.setColor(getResources().getColor(R.color.grey100, null));
+        paintRRectCurrentDate.setColor(getResources().getColor(R.color.grey100, null));
         paintRRectCurrentDate.setStyle(Paint.Style.FILL);
 
         paintLineCurrentDate = new Paint();
-        //paintLineCurrentDate.setColor(getResources().getColor(R.color.grey300, null));
+        paintLineCurrentDate.setColor(getResources().getColor(R.color.grey300, null));
         paintLineCurrentDate.setStrokeWidth(this.widthStrokeCurrentDate);
         paintLineCurrentDate.setStyle(Paint.Style.STROKE);
 
@@ -229,7 +241,6 @@ public class WeightChart extends View {
         paintGrid = new Paint();
         paintGrid.setColor(Color.RED);
         paintGrid.setStyle(Paint.Style.STROKE);
-
 
 
         paintGrid.setAntiAlias(true);
@@ -251,21 +262,22 @@ public class WeightChart extends View {
 
     public ArrayList<Integer> genAxisYValue(ArrayList<Float> list) {
 
-        int min = Math.round(Collections.min(list));
-        int max = (int)Math.ceil(Collections.max(list));
-        min = ((int) min / 5) * 5;
-        max = ((int) max / 5) * 5 + 5;
+        this.minAxisY = Math.round(Collections.min(list));
+        int max = (int) Math.ceil(Collections.max(list));
+
+        int mid = (int) Math.ceil((float) (this.minAxisY + max) / 2);
+        max = this.minAxisY + (mid - this.minAxisY) * 2;
         ArrayList<Integer> listResult = new ArrayList<>();
-        for (int i = min; i <= max; i += 5) {
-            listResult.add(i);
-        }
+        listResult.add(this.minAxisY);
+        listResult.add(mid);
+        listResult.add(max);
         return listResult;
     }
 
 
     private void calculateAxis() {
         this.unitX = widthDate + axisXDistanceDate;
-        this.unitY = axisYdistanceNumber + axisYHeightNumber;
+        this.unitYSpace = axisYdistanceNumber + axisYHeightNumber;
 
         this.listAxisX = new ArrayList<>();
         for (int i = 0; i <= 6; i++) {
@@ -273,17 +285,18 @@ public class WeightChart extends View {
         }
         this.listAxisY = new ArrayList<>();
         for (int i = 0; i < this.listNumber.size(); i++) {
-            this.listAxisY.add(getHeight() - axisXPaddingBot - axisXHeightDate - axisXYdistanceHeight - axisXHeightDate/2 - i*unitY);
+            this.listAxisY.add(getHeight() - axisXPaddingBot - axisXHeightDate - axisXYdistanceHeight - axisYHeightNumber / 2 - i * unitYSpace);
         }
+        this.unitY = this.unitYSpace /(this.listNumber.get(1) -this.listNumber.get(0));
     }
 
     private void drawValueAxis(Canvas canvas, Paint paint) {
         for (int i = 0; i <= 6; i++) {
-            canvas.drawText(this.listDate.get(i), axisXPaddingMon + i * (widthDate + axisXDistanceDate), getHeight() - axisXPaddingBot - axisXHeightDate, paint);
+            canvas.drawText(this.listDate.get(i), axisXPaddingMon + i * (widthDate + axisXDistanceDate), getHeight() - axisXPaddingBot, paint);
         }
 
         for (int i = 0; i < listNumber.size(); i++) {
-            canvas.drawText(String.valueOf(listNumber.get(i)), axisYPaddingLeft, this.listAxisY.get(i) + axisYHeightNumber/2, paint);
+            canvas.drawText(String.valueOf(listNumber.get(i)), axisYPaddingLeft, this.listAxisY.get(i) + axisYHeightNumber / 2, paint);
         }
     }
 
@@ -322,10 +335,17 @@ public class WeightChart extends View {
         drawPoint(canvas, paintFill, paintStroke, pointList.get(pointList.size() - 1));
     }
 
-    private void drawLineValueAverage(Canvas canvas, Paint paintStroke, List<Point> pointList) {
+    private Point convertWeightToPoint(float weight, float indexX){
+        return new Point(Math.round(this.listAxisX.get(0) + indexX*unitX),Math.round( listAxisY.get(0) - (weight - this.listNumber.get(0))*unitY));
+    }
 
-        for (int i = 0; i < pointList.size() - 1; i++) {
-            canvas.drawLine(pointList.get(i).x, pointList.get(i).y, pointList.get(i + 1).x, pointList.get(i + 1).y, paintStroke);
+    private void drawLineValueAverage(Canvas canvas, Paint paintStroke, List<Float> averageList) {
+        float indexX = 0;
+        for (int i = 0; i < averageList.size() - 1 ; i++) {
+            Point start = convertWeightToPoint(averageList.get(i),indexX);
+            indexX+=0.5;
+            Point end = convertWeightToPoint(averageList.get(i+1),indexX);
+            canvas.drawLine(start.x,start.y,end.x,end.y,paintStroke);
         }
     }
 
