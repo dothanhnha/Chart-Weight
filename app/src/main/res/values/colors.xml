@@ -4,6 +4,10 @@
     <color name="colorPrimaryDark">#3700B3</color>
     <color name="colorAccent">#03DAC5</color>
 
+    <color name="lighterLevel">#c3f2f2</color>
+    <color name="moderationLevel">#33cccc</color>
+    <color name="surfeitLevel">#078080</color>
+
     <color name="colorTextBlack">#212121</color>
 
     <color name="VitaBlue">#008cff</color>
@@ -44,6 +48,9 @@
     <color name="dailyWalk15">#2606CC4C</color>
 
     <color name="dailyWeight">#7F12B5</color>
+    <color name="dailyWeight12">#1F7F12B5</color>
+    <color name="dailyRecord">#33CCCC</color>
+    <color name="dailyRecord10">#1A33CCCC</color>
 
     <color name="fluctuationUp">#AA0000</color>
 
