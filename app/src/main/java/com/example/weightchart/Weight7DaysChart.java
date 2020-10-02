@@ -14,7 +14,9 @@ import android.view.View;
 import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +28,10 @@ public class Weight7DaysChart extends View {
     final float widthRRectCurrentDate = dpToPx(80, getContext());
     final float heightRRectCurrentDate = dpToPx(50, getContext());
     final float widthStrokeCurrentDate = dpToPx(2, getContext());
-    private ArrayList<Float> listWeight;
+    private ArrayList<Float> listAveragePerDate;
+    private ArrayList<Caculate7DaysWeight.ObjectPerDate> listObject;
+    private ArrayList<WeightData> listWeightData;
+    private ArrayList<Float> listValuePerTime;
 
     private float topPaddingRRectCurrentDate = dpToPx(6, getContext());
     private float leftPaddingRRectCurrentDate = dpToPx(11, getContext());
@@ -92,12 +97,29 @@ public class Weight7DaysChart extends View {
     private int minAxisY;
 
 
+
     public void setDescr(HashMap<Integer, String> descr, String textUnit) {
         this.descr = descr;
         this.textUnit = textUnit;
         this.invalidate();
     }
 
+    public void setData(ArrayList<Caculate7DaysWeight.ObjectPerDate> listObjectAverage7Days, ArrayList<WeightData> listWeightData) {
+        this.listObject = listObjectAverage7Days;
+        this.listWeightData = listWeightData;
+
+        listAveragePerDate = new ArrayList<>();
+        for(Caculate7DaysWeight.ObjectPerDate obj : listObject){
+            listAveragePerDate.add((float)obj.valueAverage);
+        }
+
+        listValuePerTime = new ArrayList<>();
+        for(WeightData obj : listWeightData){
+            listValuePerTime.add((float)obj.getFat());
+        }
+
+        this.invalidate();
+    }
 
     public Weight7DaysChart(Context context) {
         super(context);
@@ -107,17 +129,6 @@ public class Weight7DaysChart extends View {
         super(context, attrs);
         initDate();
         initPaintText();
-    }
-    public void initFakeData(){
-        this.listWeight = new ArrayList<>();
-        listWeight.add((float)getRandomNumber(50,70));
-        listWeight.add((float)getRandomNumber(50,70));
-        listWeight.add((float)getRandomNumber(50,70));
-        listWeight.add((float)getRandomNumber(50,70));
-        listWeight.add((float)getRandomNumber(50,70));
-        listWeight.add((float)getRandomNumber(50,70));
-        listWeight.add((float)getRandomNumber(50,70));
-        this.listNumber = genAxisYValue(listWeight);
     }
 
     @Override
@@ -143,60 +154,51 @@ public class Weight7DaysChart extends View {
         paintStepTextCurrentDate.getTextBounds("보", 0, 1, boundValueStepCurrentDate);
         this.heightTextStepCurrentDate = boundValueStepCurrentDate.height();
 
-///////////////////////////////////////////////////
-
-
-////////////////////////////////////////////
         calculateAxis();
 
     }
 
+    private void calculateAxis() {
+        this.unitXDay = widthDate + axisXDistanceDate;
+        this.unitXSecond = unitXDay / 86400;
+        this.unitYSpace = axisYdistanceNumber + axisYHeightNumber;
+
+        this.listAxisX = new ArrayList<>();
+        for (int i = 0; i <= 6; i++) {
+            this.listAxisX.add(axisXPaddingMon + i * unitXDay + widthDate / 2);
+        }
+        this.listAxisY = new ArrayList<>();
+        for (int i = 0; i < this.countAxisY; i++) {
+            this.listAxisY.add(getHeight() - axisXPaddingBot - heightDescr - paddingBotDescr - axisXHeightDate - axisXYdistanceHeight - axisYHeightNumber / 2 - i * unitYSpace);
+        }
+    }
+
+
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        initFakeData();
+        this.listNumber = genAxisYValue(this.listValuePerTime);
 
         this.unitY = this.unitYSpace / (this.listNumber.get(1) - this.listNumber.get(0));
 
         //drawGrid(canvas, paintGrid);
+
         drawValueAxis(canvas, paintDate);
 
-        List<Point> listPoint = new ArrayList<>();
-        List<Float> listAverageTest = new ArrayList<>();
-        List<Float> listHeightRRectTest = new ArrayList<>();
+        List<Point> listPointAveragePerDate = new ArrayList<>();
         for (int i = 0; i <= 6; i++) {
-            listPoint.add(convertWeightToPoint(listWeight.get(i), i));
+            listPointAveragePerDate.add(convertAveragePerDateToPoint(listAveragePerDate.get(i), i));
         }
 
-        for (int i = 0; i <= 6; i++) {
+/*        for (int i = 0; i <= 6; i++) {
             listHeightRRectTest.add((float) getRandomNumber(0, Math.round(dpToPx(60, getContext()))));
-        }
-
-
-        float randWeight;
-        for (int i = 0; i < listWeight.size(); i++) {
-            randWeight = this.listWeight.get(i) + getRandomNumber(-1, Math.round(dpToPx(1, getContext())));
-            if (randWeight < listNumber.get(0))
-                randWeight = listNumber.get(0);
-            else if (randWeight > listNumber.get(listNumber.size() - 1))
-                randWeight = listNumber.get(listNumber.size() - 1);
-            listAverageTest.add(randWeight);
-
-            randWeight = this.listWeight.get(i) + getRandomNumber(-1, Math.round(dpToPx(1, getContext())));
-            if (randWeight < listNumber.get(0))
-                randWeight = listNumber.get(0);
-            else if (randWeight > listNumber.get(listNumber.size() - 1))
-                randWeight = listNumber.get(listNumber.size() - 1);
-            listAverageTest.add(randWeight);
-
-        }
-        listAverageTest.remove(listAverageTest.size() - 1);
+        }*/
 
         drawLineCurrentDate(canvas, paintLineCurrentDate, 6);
 
-        drawAllRRects(canvas, paintRRect, listHeightRRectTest, listPoint);
-        drawLineValueAverage(canvas, paintAverage, listAverageTest);
-        drawLineValueDate(canvas, paintPointFill, paintPointStroke, listPoint);
+        //drawAllRRects(canvas, paintRRect, listHeightRRectTest, listPointAveragePerDate);
+        drawLineMeasureSecond(canvas, paintAverage, this.listWeightData);
+        drawAveragePerDate(canvas, paintPointFill, paintPointStroke, listPointAveragePerDate);
 
         drawRRectCurrentDate(canvas, paintRRectCurrentDate, 6);
         drawTextStepCurrentDate(canvas, paintDate, paintStepTextCurrentDate, 6);
@@ -222,10 +224,6 @@ public class Weight7DaysChart extends View {
                     - (descr.size() - 1) * distanceTwoDescr) / 2f;
             this.marginRightDescr = this.marginLeftDescr;
         }
-    }
-
-    public int getRandomNumber(int min, int max) {
-        return (int) ((Math.random() * (max - min)) + min);
     }
 
     private void initDate() {
@@ -336,22 +334,6 @@ public class Weight7DaysChart extends View {
         return listResult;
     }
 
-
-    private void calculateAxis() {
-        this.unitXDay = widthDate + axisXDistanceDate;
-        this.unitXSecond = unitXDay / 86400;
-        this.unitYSpace = axisYdistanceNumber + axisYHeightNumber;
-
-        this.listAxisX = new ArrayList<>();
-        for (int i = 0; i <= 6; i++) {
-            this.listAxisX.add(axisXPaddingMon + i * unitXDay + widthDate / 2);
-        }
-        this.listAxisY = new ArrayList<>();
-        for (int i = 0; i < this.countAxisY; i++) {
-            this.listAxisY.add(getHeight() - axisXPaddingBot - heightDescr - paddingBotDescr - axisXHeightDate - axisXYdistanceHeight - axisYHeightNumber / 2 - i * unitYSpace);
-        }
-    }
-
     private void drawValueAxis(Canvas canvas, Paint paint) {
         for (int i = 0; i <= 6; i++) {
             canvas.drawText(this.listDate.get(i), axisXPaddingMon + i * (widthDate + axisXDistanceDate), getHeight() - axisXPaddingBot - heightDescr - paddingBotDescr, paint);
@@ -389,7 +371,7 @@ public class Weight7DaysChart extends View {
         canvas.drawCircle(center.x, center.y, dpToPx(4, getContext()), paintStroke);
     }
 
-    private void drawLineValueDate(Canvas canvas, Paint paintFill, Paint paintStroke, List<Point> pointList) {
+    private void drawAveragePerDate(Canvas canvas, Paint paintFill, Paint paintStroke, List<Point> pointList) {
         for (int i = 0; i < pointList.size() - 1; i++) {
             canvas.drawLine(pointList.get(i).x, pointList.get(i).y, pointList.get(i + 1).x, pointList.get(i + 1).y, paintStroke);
             drawPoint(canvas, paintFill, paintStroke, pointList.get(i));
@@ -397,18 +379,38 @@ public class Weight7DaysChart extends View {
         drawPoint(canvas, paintFill, paintStroke, pointList.get(pointList.size() - 1));
     }
 
-    private Point convertWeightToPoint(float weight, float indexX) {
-        return new Point(Math.round(this.listAxisX.get(0) + indexX * unitXDay), Math.round(listAxisY.get(0) - (weight - this.listNumber.get(0)) * unitY));
+    private Point convertAveragePerDateToPoint(float value, float indexX) {
+        return new Point(Math.round(this.listAxisX.get(0) + indexX * unitXDay), Math.round(listAxisY.get(0) - (value - this.listNumber.get(0)) * unitY));
     }
 
-    private void drawLineValueAverage(Canvas canvas, Paint paintStroke, List<Float> averageList) {
-        float indexX = 0;
-        for (int i = 0; i < averageList.size() - 1; i++) {
-            Point start = convertWeightToPoint(averageList.get(i), indexX);
-            indexX += 0.5;
-            Point end = convertWeightToPoint(averageList.get(i + 1), indexX);
+/*    private Point convertObjectPerDateToPoint(Caculate7DaysWeight.ObjectPerDate weightData) {
+        Date date = weightData.getCollectedTime();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        int indexX = ((calendar.get(Calendar.DAY_OF_WEEK) > 1) ? (calendar.get(Calendar.DAY_OF_WEEK) - 2) : 6);
+        return new Point(Math.round(this.listAxisX.get(0) + indexX * unitXDay), Math.round(listAxisY.get(0) - ((float) weightData.valueAverage - this.listNumber.get(0)) * unitY));
+    }*/
+
+    private Point convertWeightDataToPoint(WeightData weightData) {
+        Date date = weightData.getCollectedTime();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        int indexX = ((calendar.get(Calendar.DAY_OF_WEEK) > 1) ? (calendar.get(Calendar.DAY_OF_WEEK) - 2) : 6);
+
+        return new Point(Math.round(this.listAxisX.get(0) + indexX * unitXDay - unitXDay / 2 +
+                (calendar.get(Calendar.HOUR_OF_DAY) * 3600 + calendar.get(Calendar.MINUTE) * 60 + calendar.get(Calendar.SECOND)) * unitXSecond),
+                Math.round(listAxisY.get(0) - ((float) weightData.getFat() - this.listNumber.get(0)) * unitY));
+    }
+
+
+    private void drawLineMeasureSecond(Canvas canvas, Paint paintStroke, List<WeightData> weightDataList) {
+        Point start,end = null;
+        for (int i = 0; i < weightDataList.size() - 1; i++) {
+            start = convertWeightDataToPoint(weightDataList.get(i));
+            end = convertWeightDataToPoint(weightDataList.get(i + 1));
             canvas.drawLine(start.x, start.y, end.x, end.y, paintStroke);
         }
+        canvas.drawLine(end.x, end.y, listAxisX.get(listAxisX.size()-1), end.y, paintStroke);
     }
 
     private void drawLineCurrentDate(Canvas canvas, Paint paint, int indexCurrentDate) {
@@ -433,7 +435,7 @@ public class Weight7DaysChart extends View {
     private void drawTextStepCurrentDate(Canvas canvas, Paint paintDate, Paint paintValueStep, int indexCurrentDate) {
         canvas.drawText("8/25 · 오늘", this.leftRRectCurrentDate + this.leftPaddingRRectCurrentDate,
                 this.topPaddingRRectCurrentDate + axisXHeightDate, paintDate);
-        canvas.drawText(this.listWeight.get(indexCurrentDate) + this.textUnit, this.leftRRectCurrentDate + this.leftPaddingRRectCurrentDate,
+        canvas.drawText(this.listAveragePerDate.get(indexCurrentDate) + this.textUnit, this.leftRRectCurrentDate + this.leftPaddingRRectCurrentDate,
                 this.topPaddingRRectCurrentDate + axisXHeightDate + heightTextStepCurrentDate + this.topPaddingTextStepCurrentDate,
                 paintValueStep);
     }

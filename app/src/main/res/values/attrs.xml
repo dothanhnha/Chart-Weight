@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="ExpandableLayout">
+        <attr name="colorActive" format="color" />
+        <attr name="designLeftTab" format="boolean" />
+        <attr name="designRightTab" format="boolean" />
+    </declare-styleable>
+
+    <declare-styleable name="ViewMissionDaily">
+        <attr name="isComplete" format="boolean" />
+    </declare-styleable>
+
+    <declare-styleable name="ComponentDailyEating">
+        <attr name="eatingType" format="enum">
+            <enum name="MEAL" value="0" />
+            <enum name="DRINK" value="1" />
+        </attr>
+    </declare-styleable>
+
+    <declare-styleable name="ComponentExerciseRecordResult">
+        <attr name="exerciseType" format="enum">
+            <enum name="PUSH_UP" value="2" />
+            <enum name="SQUAT" value="3" />
+            <enum name="LUNGE" value="4" />
+            <enum name="PULL_UP" value="5" />
+            <enum name="OTHERS" value="6" />
+        </attr>
+    </declare-styleable>s
+
+    <declare-styleable name="ViewChangeValue">
+        <attr name="isIncrease" format="boolean" />
+        <attr name="value" format="string" />
+        <attr name="android:fontFamily" />
+        <attr name="textSize" format="dimension" />
+        <attr name="emptyDataColor" format="color" />
+    </declare-styleable>
+
+    <declare-styleable name="ViewListKindChart">
+        <attr name="listLabel" format="string" />
+        <attr name="colorKindSelected" format="color" />
+        <attr name="android:fontFamily" />
+    </declare-styleable>
+
+
+
+
+</resources>
