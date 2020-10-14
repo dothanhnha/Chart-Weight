@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <com.example.weightchart.Weight7DaysChart
+    <com.example.weightchart.Sleep7DaysChart
         android:id="@+id/chart"
         android:layout_width="312dp"
         android:layout_height="305dp"
