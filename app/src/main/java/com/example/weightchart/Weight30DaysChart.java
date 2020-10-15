@@ -12,12 +12,14 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class Weight30DaysChart extends View {
 
+    private final SimpleDateFormat formatFullDateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     final float widthRectStepPerDate = dpToPx(6, getContext());
     final float radRRectStepPerDate = dpToPx(4, getContext());
@@ -417,4 +419,5 @@ public class Weight30DaysChart extends View {
     private float convertValueToPx(float value) {
         return this.listAxisY.get(0) - (value - listNumber.get(0)) * unitY;
     }
+
 }
