@@ -7,7 +7,7 @@
     android:background="@color/grey50Light"
     tools:context=".MainActivity">
 
-    <com.example.weightchart.Sleep7DaysChart
+    <com.example.weightchart.Sleep30DaysChart
         android:id="@+id/chart"
         android:layout_width="282dp"
         android:layout_height="294dp"
